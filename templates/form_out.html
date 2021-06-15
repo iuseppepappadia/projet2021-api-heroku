@@ -1,0 +1,168 @@
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Flask Auth Example</title>
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static',filename='style.css') }}">
+</head>
+
+
+<style>
+p, h4,label{
+    font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
+    text-align: center;
+background-color:white;}
+
+.f{
+    border: 1px solid black;
+    margin: 5px;
+    
+    border-radius: 4px;
+    padding: 100px;
+    float: right;
+    background: white;
+}  
+.k{
+    border: 1px solid black;
+    margin: 30px;
+    margin-top: 300px;
+    margin-left: 20pc;
+    border-radius: 4px;
+    padding: 100px;
+    float: left;
+    background: white;
+}  
+
+body{background-image: url("https://image.freepik.com/free-vector/low-poly-design-with-teal-silver-colours_1048-8727.jpg");
+    
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: cover;
+    background-attachment: fixed;
+
+}
+
+
+#text-file{
+    background-color: white;
+    text-align: center;
+}
+
+#dict{
+    background-color: white;
+    text-align: center;
+}
+
+#spec_res{
+    background-color: white;
+    text-align: center;
+}
+
+
+input{
+    border: 3px solid rgb(235, 224, 224);
+    border-radius: 10px;
+    background: white;
+   
+}
+
+</style>
+</head>
+<body>
+
+<div class="hero-head">
+            <nav class="navbar">
+                <div class="container">
+
+                    <div id="navbarMenuHeroA" class="navbar-menu">
+                        <div class="navbar-end">
+							<a href="{{ url_for('base')}}" class="navbar-item">Home</a>
+                            <a href="{{ url_for('atform') }}" class="navbar-item">Insert</a>
+							<!-- se l'utente non ha acceduto può effettuare il login o iscriversi -->
+							<a href="{{ url_for('login') }}" class="navbar-item">Login</a>
+							<a href="{{ url_for('signup') }}" class="navbar-item">Sign Up</a>
+							
+							 <!-- se l'utente ha già acceduto può effettuare il logout -->
+							<a href="{{ url_for('logout') }}" class="navbar-item">Logout</a>
+							
+                        </div>
+                    </div>
+                </div>
+            </nav>
+        </div>
+
+<div class="f">
+	<h2 style=" font-style: bold; text-align:center;">Generic Research</h2>
+	{%if message != '' %}
+	<h4>{{message}}</h4>
+	{%endif%}
+	<hr>
+	<form method='post' id='text-file' action="{{url_for('apply')}}" enctype="multipart/form-data">
+		<label for="myfile">Insert a Text file:</label>
+		<input type='file' id='myfile' name='myfile' accept=''>
+		<br/><br/>
+		<label for="threshold">Threshold Value:</label>
+		<input type="number" id="threshold" name="threshold" min="1" max="100" value="5">
+		
+		
+		<input type='submit' id='submitted' name='submitted' value='Process'>
+    </form>
+
+	<br/>
+	<br/>
+	<br/>
+	<h2 style=" font-style: bold; text-align:center;">Insert a new Topic</h2>
+	<hr>
+	<form method='post' id='dict' action="{{url_for('add')}}" enctype="multipart/form-data">
+		<label for="define">New Topic:</label>
+		<input type="text" id="define" name="define">
+		<br/><br/>
+		<label for="file_dict">Insert Dictionary:</label>
+		<input type='file' id='file_dict' name='myfile_dict' accept=''>
+		
+		
+		<input type='submit' id='sub_dict' name='sub_dict' value='Add'>
+    </form>
+
+	<br/>
+	<br/>
+	<br/>
+	<h2 style=" font-style: bold; text-align:center;">Specific Research</h2>
+<hr>
+	<form method='post' id='spec_res' action="{{url_for('specific')}}" enctype="multipart/form-data">
+		<label for="mytext">Digit Topic(s):</label>
+		<input type='text' id='mytext' name='mytext'>
+		<br/><br/>
+		<label for="file_spec">Insert a Text file:</label>
+		<input type='file' id='file_spec' name='file_spec' accept=''>
+		<br/><br/>
+		<label for="threshold2">Threshold Value:</label>
+		<input type="number" id="threshold2" name="threshold2" min="1" max="100" value="5">
+		<br><br/>
+		<input type='submit' id='filter' name='filter' value='Filter'> <!--non considera i valori immessi -->
+		
+		<input type='submit' id='subset' name='subset' value='Subset'><!-- considera solo quelli immessi -->
+    </form>
+</div>
+
+<div class="k">
+    <h2 style=" font-style: bold; text-align:center;">
+	Topic(s) : 
+	<ul>
+		{%if args == []%}
+			<li>No Topics Found</li>
+		{%endif%}
+		{%if args!=[]%}
+			{% for item in args %}
+				<li>{{item}}</li>
+			{% endfor %}
+		{%endif%}
+	</ul>
+	</h2>
+</div>
+</body>
+</html>
+
+
