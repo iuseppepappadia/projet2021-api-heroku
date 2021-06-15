@@ -1,0 +1,7 @@
+stopwords
+wordnet
+porter_test
+reuters
+punkt
+PorterStemmer
+word_tokenize
