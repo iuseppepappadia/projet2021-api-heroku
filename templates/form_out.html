@@ -6,7 +6,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Flask Auth Example</title>
     <link rel="stylesheet" type="text/css" href="{{ url_for('static',filename='style.css') }}">
-</head>
 
 
 <style>
@@ -141,21 +140,22 @@ input{
 		<label for="threshold2">Threshold Value:</label>
 		<input type="number" id="threshold2" name="threshold2" min="1" max="100" value="5">
 		<br><br/>
-		<input type='submit' id='filter' name='filter' value='Filter'> <!--non considera i valori immessi -->
+		<input type='submit' id='filter' name='filter' value='filter'> <!--non considera i valori immessi -->
 		
-		<input type='submit' id='subset' name='subset' value='Subset'><!-- considera solo quelli immessi -->
+		<input type='submit' id='subset' name='subset' value='subset'><!-- considera solo quelli immessi -->
     </form>
 </div>
 
 <div class="k">
     <h2 style=" font-style: bold; text-align:center;">
-	Topic(s) : 
-	<ul>
-		{%if args == []%}
-			<li>No Topics Found</li>
+		{%if args==[]%}
+		No Results 
 		{%endif%}
+		
 		{%if args!=[]%}
-			{% for item in args %}
+		Topic(s) : 
+		<ul>
+		{% for item in args %}
 				<li>{{item}}</li>
 			{% endfor %}
 		{%endif%}
