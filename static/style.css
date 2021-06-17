@@ -1,0 +1,82 @@
+p, h4,label{
+    font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
+    text-align: center;
+background-color:white;}
+
+
+nav{
+    height : 100px;
+        width : 115%;
+        background : white;
+        margin-top: -10px;
+        margin-left : -10px;
+        margin-bottom: 5pc;
+    
+    
+    }
+   
+    .navbar-menu{position : absolute;
+        left : 40%;
+        font-size : 20px;
+       margin-top: 30px;
+        word-spacing : 40px;}
+        
+
+
+        .navbar-menu a{color: black;
+    text-decoration : none;
+    word-spacing : 30px;}
+     
+        
+     
+
+.f{
+    border: 1px solid black;
+    margin: 5px;
+}
+.k{
+    border: 1px solid black;
+    margin: 30px;
+    margin-top: 300px;
+    margin-left: 20pc;
+    border-radius: 4px;
+    padding: 100px;
+    float: left;
+    background: white;
+}  
+
+body{background-image: url("https://image.freepik.com/free-vector/low-poly-design-with-teal-silver-colours_1048-8727.jpg");
+    
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: cover;
+    background-attachment: fixed;
+
+}
+
+
+#text-file{
+    background-color: white;
+    text-align: center;
+}
+
+#dict{
+    background-color: white;
+    text-align: center;
+}
+
+#spec_res{
+    background-color: white;
+    text-align: center;
+}
+
+
+input{
+    border: 3px solid rgb(235, 224, 224);
+    border-radius: 10px;
+    background: white;
+   
+}
+
+
+
