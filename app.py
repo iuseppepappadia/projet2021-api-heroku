@@ -1,17 +1,25 @@
 from flask import Flask, render_template, url_for, request, flash,redirect
 from flask_sqlalchemy import SQLAlchemy
 import re
-
+from sqlalchemy import create_engine
+from sqlalchemy import text as txt
 from nltk.corpus import stopwords                    
 from nltk.tokenize import word_tokenize
 from nltk.stem import PorterStemmer
+from sqlalchemy.dialects import registry
 
 app = Flask(__name__)
+
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS']=False
 app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://hqhuebgborpypm:06e3f5f1cc916a9fa93250d2a5638845b168a555fd2702f316f0c8f913c572f7@ec2-34-193-101-0.compute-1.amazonaws.com:5432/de877rvmsp1n6m'
 app.config['SQLALCHEMY_SECRET_KEY'] = 'secret-key-goes'
 app.secret_key = 'super secret key'
 db = SQLAlchemy(app)
+
+
+registry.register('snowflake', 'snowflake.sqlalchemy', 'dialect')
+eng = create_engine('postgresql://hqhuebgborpypm:06e3f5f1cc916a9fa93250d2a5638845b168a555fd2702f316f0c8f913c572f7@ec2-34-193-101-0.compute-1.amazonaws.com:5432/de877rvmsp1n6m')
+connection = eng.connect()
 
 stemmer= PorterStemmer()
 stop_words = set(stopwords.words('french'))
@@ -47,7 +55,7 @@ class Clean():
     def cleaning(document):
     # Remove all the special characters
         document = re.sub(r'\W', ' ', document)
-        document = re.sub('\xc3\xa9', 'é', document)
+        document = re.sub('\\xc3\\xa9', 'é', document)
     # remove all single characters
         document = re.sub(r'\s+[a-zA-Z]\s+', ' ', document)
     # Remove single characters from the start
@@ -83,14 +91,14 @@ class thematiseur():
         return args
         
      def thematiseur_spec(text,index,threshold):
-       
-        myresult = Topic.query.with_entities(Topic.name,Topic.dictionary).filter(Topic.id_topic==index).all()
-
-        for x in myresult: # ciclo per conservare i risultati in un dizionario
-            z = x[0]
-            y = x[1]
+        sql_query = txt("SELECT name,dictionary FROM topics WHERE id_topic = :index ")
+        result = connection.execute(sql_query,index=index)
+        myresult = result.fetchall()
+        #myresult = Topic.query.filter_by(id_topic=index).first()
             # nome del topic e lista di parole chiave            
-            
+        for res in myresult:
+            z = res[0]
+            y = res[1]
         text = Clean.cleaning(text) #pulizia del testo e del dizionario
         pured_dict = Clean.cleaning(y)
         m = Clean.similarity(text,pured_dict) #calcolo somiglianza tra i testi
@@ -153,7 +161,7 @@ def login_post():
 
 @app.route('/logout')
 def logout():
-    return render_template('base.html',status=0)
+    return render_template('base.html')
 
 @app.route('/submitted', methods=['GET','POST'])
 def apply():
@@ -163,11 +171,12 @@ def apply():
         file = request.files['myfile']
         if file:
             text=str(file.read())
+            text = text.encode('latin-1').decode('utf-8')
         else:
             return render_template('form_out.html',message='Please, Insert A File',arg=[])
         thr = int(form_html['threshold'])
         dicts = {}
-        for i in range(1,length):
+        for i in range(1,length+1):
             dicts[i]= thr
         args = thematiseur.thematiseur_gen(text,dicts)
         if len(args)>0:
@@ -184,7 +193,7 @@ def add():
         file = request.files['myfile_dict']
         if file:
             text =str(file.read())
-            text = text.encode(encoding='utf-8').decode()
+            text = text.encode('latin-1').decode('utf-8')
             # do something with file contents
         else:
             return render_template('form_out.html',message='Please, Insert A File',arg=[])
@@ -201,8 +210,8 @@ def specific():
     if request.method == 'POST':
         file = request.files['file_spec']
         if file:
-            text =str( file.read())
-            text = text.encode(encoding='utf-8').decode()
+            text =str(file.read())
+            text = text.encode('latin-1').decode('utf-8')
             # do something with file contents
         else:
             return render_template('form_out.html',message='Please, Insert A File',arg=[])
@@ -210,22 +219,36 @@ def specific():
         thr = int(form_html['threshold2'])
         topics = form_html['mytext']
         topics = topics.split(',')        
-        if request.form.get("Filter") and len(topics)!=0:
-            placeholders= ', '.join("'"+str(topics[i])+"'" for i in range(len(topics)))
-            res = Topic.query.filter(Topic.topic.in_(placeholders) ).all()
-        elif request.form.get("Subset") and len(topics)!=0:
-            placeholders= ', '.join("'"+str(topics[i])+"'" for i in range(len(topics)))
-            res = Topic.query.filter(Topic.topic.in_(placeholders) ).all()
-        else:
-            return render_template('form_out.html',message='Insert At Least A Topic',arg=[])
-        
         args = []
-        for x in res:
-            y = thematiseur.thematiseur_spec(text,*x,thr)
-            if y!=None:
-                args.append(y)
-        return render_template('form_out.html',args=args,message='')
- 
+        #☺placeholders=[]
+        #for value in topics:
+         #   h = (value,)
+          #  placeholders.append(h)
+        
+        #placeholders= ','.join("'"+str(topics[i])+"'" for i in range(len(topics)))
+        if request.form.get("filter"):
+            for item in topics:
+                sql = txt("SELECT id_topic FROM topics WHERE name = :item")
+                result = connection.execute(sql,item=item)
+                myresult = result.first()
+                for index in myresult: 
+                    value = thematiseur.thematiseur_spec(text,index,thr)
+                    #if value!=None:
+                    args.append(value)
+            return render_template('form_out.html',args=args,message='')
+        elif request.form.get("subset") :
+            
+            sql = txt("SELECT id_topic FROM topics WHERE name NOT IN :topics")
+            result = connection.execute(sql,topics=tuple(topics))
+            myresult = result.fetchall()
+            #res = Topic.query.filter_by(Topic.name.in_(topics)).all()
+            for index in myresult:
+                value = thematiseur.thematiseur_spec(text,index[0],thr)
+                if value != None:
+                    args.append(value)
+            return render_template('form_out.html',args=args,message='')
+        else :
+            return render_template('form_out.html',args=[],message='')
 
 
 if __name__ == '__main__':
